@@ -2,11 +2,6 @@
 
 An interactive AI-powered portfolio using RAG (Retrieval-Augmented Generation) to answer questions about my CV and projects.
 
-## Demo
-
-**[View live demo](https://)**
-
-![Demo Portfolio RAG](./docs/demo.gif)
 
 ## Concept
 
@@ -115,7 +110,7 @@ npm run build-index
 
 ### Modify your information
 
-1. **CV**: Replace `src/data/documents/cv.pdf`
+1. **CV**: Replace `src/data/documents/cv.pdf or .txt`
 2. **Mock data**: Edit data in `scripts/build-index.ts`
 3. **Suggestions**: Modify suggested questions in `src/app/page.tsx`
 
