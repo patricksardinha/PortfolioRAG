@@ -4,7 +4,7 @@ An interactive AI-powered portfolio using RAG (Retrieval-Augmented Generation) t
 
 ## Demo
 
-**[View live demo](https://portfolio.vercel.app)**
+**[View live demo](https://)**
 
 ![Demo Portfolio RAG](./docs/demo.gif)
 
@@ -22,7 +22,7 @@ An innovative portfolio where visitors can ask natural language questions about 
 ## Technologies
 
 ### Frontend
-- **Next.js 14** - React framework with App Router
+- **Next.js** - React framework with App Router
 - **TypeScript** - Type safety and IntelliSense
 - **Tailwind CSS** - Modern and responsive styling
 - **Lucide React** - Elegant icons
@@ -51,8 +51,8 @@ An innovative portfolio where visitors can ask natural language questions about 
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/portfolio-rag.git
-cd portfolio-rag
+git clone https://github.com/patricksardinha/PortfolioRAG.git
+cd PortfolioRag
 
 # Install dependencies
 npm install

@@ -1,4 +1,3 @@
-// src/lib/search.ts
 import searchIndex from '@/data/processed/index.json';
 import type { SearchIndex, ChunkMetadata } from '../../scripts/build-index';
 
@@ -87,8 +86,8 @@ class SearchEngine {
   // Recherche principale
   search(query: string, options: SearchOptions = {}): SearchResponse {
     const {
-      topK = this.index.searchConfig.defaultTopK,
-      minSimilarity = this.index.searchConfig.minSimilarity,
+      topK = 4,                    // Plus de résultats
+      minSimilarity = 0.03,        // Seuil plus bas pour plus de contexte
       boostRecent = true,
       boostSections = true
     } = options;
@@ -157,43 +156,46 @@ class SearchEngine {
   private applyBoosts(query: string, chunk: ChunkMetadata, baseSimilarity: number): number {
     let boostedSimilarity = baseSimilarity;
     
-    // Boost par type de section
+    // Boost par type de section - spécifique à Patrick
     const sectionBoosts: Record<string, number> = {
-      'experience': 1.2,
-      'competences': 1.15,
-      'projets': 1.1,
-      'formation': 1.05,
-      'technologies': 1.1,
-      'header': 0.9,
-      'contact': 0.8
+      'experience': 1.3,        // Expériences professionnelles prioritaires
+      'projet': 1.25,          // Projets importants  
+      'competences': 1.2,      // Compétences techniques
+      'diplome': 1.15,         // Formation
+      'formation_complementaire': 1.1,
+      'profil': 1.05,          // Présentation
+      'langues': 0.9
     };
     
     if (sectionBoosts[chunk.type]) {
       boostedSimilarity *= sectionBoosts[chunk.type];
     }
 
-    // Boost pour correspondances exactes
-    const queryWords = query.toLowerCase().split(/\s+/);
-    const contentWords = chunk.content.toLowerCase();
-    const exactMatches = queryWords.filter(word => 
-      contentWords.includes(word) && word.length > 2
+    // Boost pour correspondances exactes de technologies de Patrick
+    const patrickTechs = [
+      'c#', 'csharp', 'rust', 'react', 'typescript', 'javascript', 
+      'wpf', 'xaml', 'nextjs', 'tailwind', 'symfony', 'nodejs',
+      'sqlite', 'unity', 'tauri', 'genève', 'bontaz', 'gaea21'
+    ];
+    
+    const queryLower = query.toLowerCase();
+    const contentLower = chunk.content.toLowerCase();
+    
+    const techMatches = patrickTechs.filter(tech => 
+      queryLower.includes(tech) && contentLower.includes(tech)
     ).length;
     
-    if (exactMatches > 0) {
-      boostedSimilarity *= (1 + exactMatches * 0.1);
+    if (techMatches > 0) {
+      boostedSimilarity *= (1 + techMatches * 0.15);
     }
 
-    // Boost pour densité de mots-clés techniques
-    const techKeywords = this.keywords.filter(k => 
-      ['javascript', 'react', 'nodejs', 'python', 'typescript'].includes(k)
-    );
+    // Boost pour correspondances titre vs contenu
+    const titleLower = chunk.title.toLowerCase();
+    const queryWords = queryLower.split(/\s+/).filter(w => w.length > 2);
     
-    const techMatches = techKeywords.filter(keyword => 
-      contentWords.includes(keyword)
-    ).length;
-    
-    if (techMatches > 0 && queryWords.some(w => techKeywords.includes(w))) {
-      boostedSimilarity *= (1 + techMatches * 0.05);
+    const titleMatches = queryWords.filter(word => titleLower.includes(word)).length;
+    if (titleMatches > 0) {
+      boostedSimilarity *= (1 + titleMatches * 0.1);
     }
 
     return Math.min(boostedSimilarity, 1.0);
@@ -203,12 +205,23 @@ class SearchEngine {
   private buildContext(results: SimilarityResult[]): string {
     if (results.length === 0) return '';
 
-    const maxContextLength = 1500; // Limite pour éviter surcharge token
+    const maxContextLength = 2000; // Augmenté pour plus de contexte
     let context = '';
     let currentLength = 0;
 
-    for (const result of results) {
-      const chunkHeader = `[${result.chunk.title || result.chunk.type}]`;
+    // Organiser par type de section pour un contexte logique
+    const sectionOrder = ['profil', 'experience', 'projet', 'competences', 'diplome', 'formation_complementaire', 'langues'];
+    
+    const organizedResults = results.sort((a, b) => {
+      const orderA = sectionOrder.indexOf(a.chunk.type) !== -1 ? sectionOrder.indexOf(a.chunk.type) : 999;
+      const orderB = sectionOrder.indexOf(b.chunk.type) !== -1 ? sectionOrder.indexOf(b.chunk.type) : 999;
+      
+      if (orderA !== orderB) return orderA - orderB;
+      return b.similarity - a.similarity;
+    });
+
+    for (const result of organizedResults) {
+      const chunkHeader = `[${result.chunk.title}]`;
       const chunkContent = `${chunkHeader}\n${result.chunk.content}`;
       const chunkWithSeparator = chunkContent + '\n\n';
 
@@ -315,50 +328,18 @@ class SearchEngine {
 
   // Suggestions de questions basées sur le contenu
   getSuggestions(): string[] {
-    const suggestions: string[] = [];
-    const sectionTypes = [...new Set(this.index.chunks.map(c => c.type))];
-    
-    const suggestionTemplates: Record<string, string[]> = {
-      'experience': [
-        'Quelle est ton expérience professionnelle ?',
-        'Parle-moi de tes postes précédents',
-        'Quelles entreprises as-tu rejoint ?'
-      ],
-      'competences': [
-        'Quelles sont tes compétences techniques ?',
-        'Quelles technologies maîtrises-tu ?',
-        'Peux-tu me parler de ton stack technique ?'
-      ],
-      'projets': [
-        'Quels projets as-tu réalisés ?',
-        'Montre-moi tes réalisations',
-        'Peux-tu détailler un projet intéressant ?'
-      ],
-      'formation': [
-        'Quel est ton parcours de formation ?',
-        'Où as-tu étudié ?',
-        'Quels diplômes as-tu obtenus ?'
-      ]
-    };
-
-    // Générer suggestions basées sur sections disponibles
-    sectionTypes.forEach(type => {
-      if (suggestionTemplates[type]) {
-        suggestions.push(...suggestionTemplates[type]);
-      }
-    });
-
-    // Ajouter suggestions générales
-    suggestions.push(
-      'Peux-tu te présenter en quelques mots ?',
-      'Qu\'est-ce qui te passionne dans le développement ?',
-      'Comment puis-je te contacter ?'
-    );
-
-    // Retourner 6 suggestions aléatoires
-    return suggestions
-      .sort(() => Math.random() - 0.5)
-      .slice(0, 6);
+    return [
+      "Quel est ton parcours professionnel ?",
+      "Quelles technologies maîtrises-tu ?",
+      "Parle-moi de tes projets personnels",
+      "Quelle est ta formation ?",
+      "Où as-tu travaillé ?",
+      "Quels sont tes projets WPF et Rust ?",
+      "Ton expérience avec React et TypeScript ?",
+      "Tes formations complémentaires ?",
+      "Comment te contacter ?",
+      "Tes compétences en intelligence artificielle ?"
+    ];
   }
 
   // Statistiques de l'index

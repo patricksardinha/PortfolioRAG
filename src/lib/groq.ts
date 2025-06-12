@@ -1,4 +1,3 @@
-// src/lib/groq.ts
 import { useState, useCallback, useEffect } from 'react';
 import type { SearchSource } from './search';
 
@@ -82,29 +81,50 @@ class GroqClient {
 
   // Construire prompt système avec contexte RAG
   private buildSystemPrompt(context: string = '', sources: SearchSource[] = []): string {
-    let prompt = `Tu es un assistant IA qui répond aux questions sur le CV et le portfolio de John Developer.`;
-    
+    let prompt = `Tu es l'assistant IA personnel de Patrick Sardinha, développeur full-stack spécialisé en C#, Rust, React et technologies web modernes.
+
+  IDENTITÉ DE PATRICK:
+  - Nom: Patrick Sardinha
+  - Diplômes: Master et Bachelor en Science Informatique (Université de Genève, 2021 et 2019)
+  - Poste actuel: Développeur logiciel chez Bontaz (depuis août 2024)
+  - Expérience précédente: Développeur full-stack chez Gaea21 (sept 2023 - août 2024)
+  - Spécialités: Applications WPF/C#, développement web React/TypeScript, Rust, applications desktop`;
+
     if (context.trim()) {
-      prompt += `\n\nCONTEXTE du CV/Portfolio:\n${context}`;
+      prompt += `\n\nCONTEXTE SPÉCIFIQUE DU CV:
+  ${context}`;
       
       if (sources.length > 0) {
         const sourcesList = sources.map((source, index) => 
           `${index + 1}. ${source.title} (${source.type}) - Pertinence: ${source.similarity}%`
         ).join('\n');
         
-        prompt += `\n\nSOURCES utilisées:\n${sourcesList}`;
+        prompt += `\n\nSOURCES CONSULTÉES:
+  ${sourcesList}`;
       }
-      
-      prompt += `\n\nINSTRUCTIONS:
-- Réponds UNIQUEMENT en te basant sur les informations du contexte fourni
-- Si l'information n'est pas dans le contexte, dis-le clairement
-- Sois précis, professionnel et engageant
-- Utilise un ton conversationnel mais expert
-- Cite les sections pertinentes quand c'est utile
-- Réponds en français`;
-    } else {
-      prompt += `\n\nAucun contexte spécifique trouvé dans le CV. Réponds de manière générale en tant qu'assistant de portfolio professionnel.`;
     }
+
+    prompt += `\n\nRÈGLES STRICTES:
+  1. UNIQUEMENT les informations du contexte fourni ci-dessus
+  2. SI l'information n'est PAS dans le contexte: "Je ne trouve pas cette information dans le CV de Patrick"
+  3. NE JAMAIS inventer ou supposer des informations non mentionnées
+  4. NE JAMAIS extrapoler au-delà des faits fournis
+  5. Être précis sur les dates, entreprises, technologies mentionnées
+  6. Répondre à la première personne comme si tu étais Patrick
+  7. Rester professionnel et factuel
+
+  EXEMPLES DE RÉPONSES CORRECTES:
+  - "J'ai travaillé chez Bontaz depuis août 2024 sur des technologies C#, XAML, Rust..."
+  - "Mon Master en Science Informatique à l'Université de Genève a été obtenu en 2021"
+  - "Je ne trouve pas d'information sur [sujet] dans mon CV"
+
+  TECHNOLOGIES PRINCIPALES (seulement si dans le contexte):
+  - Langages: C#, Rust, TypeScript, JavaScript, Python, PHP
+  - Frontend: React, WPF/XAML, HTML/CSS, Tailwind
+  - Backend: Node.js, Express.js, Symfony
+  - Outils: Git, Docker, Unity, SQLite
+
+  Réponds toujours en français, de manière directe et factuelle.`;
 
     return prompt;
   }
@@ -267,18 +287,18 @@ class GroqClient {
       { 
         id: 'llama-3.1-8b-instant', 
         name: 'Llama 3.1 8B', 
-        description: '⚡ Rapide et efficace',
+        description: 'Rapide et efficace',
         recommended: true
       },
       { 
-        id: 'llama-3.1-70b-versatile', 
-        name: 'Llama 3.1 70B', 
-        description: '🧠 Plus intelligent, plus lent'
+        id: 'llama-3.3-70b-versatile', 
+        name: 'Llama 3.3 70B', 
+        description: 'Plus intelligent, plus lent'
       },
       { 
-        id: 'mixtral-8x7b-32768', 
-        name: 'Mixtral 8x7B', 
-        description: '🇫🇷 Excellent pour le français'
+        id: 'mixtral-saba-24b', 
+        name: 'Mixtral Saba 24B', 
+        description: 'Un bon rapport vitesse / efficacité'
       }
     ];
   }
