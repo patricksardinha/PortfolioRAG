@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 const DOCUMENTS_DIR = path.join(__dirname, '../src/data/documents');
 const OUTPUT_FILE = path.join(__dirname, '../src/data/processed/index.json');
 
-console.log('🏗️  BUILD INDEX - PATRICK SARDINHA CV\n');
+console.log('BUILD INDEX - PATRICK SARDINHA CV\n');
 
 // Types
 interface ChunkMetadata {
@@ -53,19 +53,19 @@ interface RawChunk {
 // Parser optimisé pour le CV de Patrick
 class PatrickCVParser {
   static extractText(filePath: string): string {
-    console.log(`📖 Lecture CV: ${filePath}`);
+    console.log(`Lecture CV: ${filePath}`);
     
     if (!fs.existsSync(filePath)) {
-      throw new Error(`❌ Fichier introuvable: ${filePath}`);
+      throw new Error(`Fichier introuvable: ${filePath}`);
     }
 
     const text = fs.readFileSync(filePath, 'utf-8');
-    console.log(`✅ CV lu: ${text.length} caractères`);
+    console.log(`CV lu: ${text.length} caractères`);
     return text;
   }
 }
 
-// Chunker spécialisé pour le format du CV de Patrick
+// Chunker spécialisé pour le format du CV
 class PatrickCVChunker {
   static chunk(text: string, filename: string): RawChunk[] {
     console.log(`📋 Analyse du CV de Patrick...`);
@@ -74,7 +74,7 @@ class PatrickCVChunker {
     const chunks: RawChunk[] = [];
     let currentSection: RawChunk | null = null;
     
-    // Patterns spécifiques au CV de Patrick
+    // Patterns spécifiques au CV
     const sectionPatterns: Record<string, RegExp> = {
       'profil': /^(À PROPOS|PROFIL|PRÉSENTATION)/i,
       'diplomes': /^(DIPLÔMES|FORMATION|ÉDUCATION)/i,
@@ -224,7 +224,7 @@ class PatrickCVChunker {
         title: chunk.title.trim()
       }));
     
-    console.log(`✅ Chunks créés: ${validChunks.length}`);
+    console.log(`Chunks créés: ${validChunks.length}`);
     
     // Debug: afficher structure
     validChunks.forEach((chunk, i) => {
@@ -235,7 +235,7 @@ class PatrickCVChunker {
   }
 }
 
-// Embeddings optimisés pour Patrick (développeur full-stack)
+// Embeddings optimisés (développeur full-stack)
 class PatrickEmbeddingGenerator {
   static readonly keywords: string[] = [
     // Langages mentionnés dans le CV
@@ -312,7 +312,7 @@ class PatrickEmbeddingGenerator {
       const textLength = Math.max(text.length / 150, 1);
       let score = totalMatches / textLength;
       
-      // Boost pour technologies principales de Patrick
+      // Boost pour technologies principales
       const boostKeywords = ['react', 'typescript', 'javascript', 'csharp', 'rust', 'nextjs', 'wpf'];
       if (boostKeywords.some(boost => keyword.includes(boost))) {
         score *= 1.3;
@@ -326,7 +326,7 @@ class PatrickEmbeddingGenerator {
 // Build principal
 async function buildIndex(): Promise<SearchIndex> {
   try {
-    console.log('📂 Vérification des dossiers...');
+    console.log('Vérification des dossiers...');
     
     // Créer dossiers
     const outputDir = path.dirname(OUTPUT_FILE);
@@ -336,7 +336,7 @@ async function buildIndex(): Promise<SearchIndex> {
     
     if (!fs.existsSync(DOCUMENTS_DIR)) {
       fs.mkdirSync(DOCUMENTS_DIR, { recursive: true });
-      console.error(`❌ Créez le dossier: ${DOCUMENTS_DIR}`);
+      console.error(`Créez le dossier: ${DOCUMENTS_DIR}`);
       process.exit(1);
     }
     
@@ -345,24 +345,24 @@ async function buildIndex(): Promise<SearchIndex> {
     const cvFile = files.find(f => f.toLowerCase().includes('cv') && f.endsWith('.txt'));
     
     if (!cvFile) {
-      console.error('❌ Fichier cv.txt introuvable !');
-      console.log(`📝 Placez cv.txt dans: ${DOCUMENTS_DIR}`);
+      console.error('Fichier cv.txt introuvable !');
+      console.log(`Placez cv.txt dans: ${DOCUMENTS_DIR}`);
       process.exit(1);
     }
     
-    console.log(`📄 Fichier CV trouvé: ${cvFile}`);
+    console.log(`Fichier CV trouvé: ${cvFile}`);
 
     const documents: DocumentInfo[] = [];
     const allChunks: ChunkMetadata[] = [];
     
     // Traitement du CV
     const filePath = path.join(DOCUMENTS_DIR, cvFile);
-    console.log(`\n🔄 Traitement: ${cvFile}`);
+    console.log(`\nTraitement: ${cvFile}`);
     
     const text = PatrickCVParser.extractText(filePath);
     const rawChunks = PatrickCVChunker.chunk(text, cvFile);
     
-    console.log(`\n🔢 Génération embeddings...`);
+    console.log(`\nGénération embeddings...`);
     const chunksWithEmbeddings: ChunkMetadata[] = rawChunks.map((chunk, index) => {
       const embedding = PatrickEmbeddingGenerator.generateEmbedding(chunk.content + ' ' + chunk.title);
       
@@ -404,21 +404,21 @@ async function buildIndex(): Promise<SearchIndex> {
 
     fs.writeFileSync(OUTPUT_FILE, JSON.stringify(index, null, 2));
     
-    console.log(`\n🎉 INDEX CRÉÉ POUR PATRICK SARDINHA !\n`);
-    console.log(`📊 Statistiques:`);
-    console.log(`   📄 Documents: ${documents.length}`);
-    console.log(`   📋 Chunks: ${allChunks.length}`);
-    console.log(`   🔢 Dimensions: ${PatrickEmbeddingGenerator.keywords.length}`);
-    console.log(`   💾 Taille: ${Math.round(fs.statSync(OUTPUT_FILE).size / 1024)} KB`);
+    console.log(`\nINDEX CRÉÉ !\n`);
+    console.log(`Statistiques:`);
+    console.log(`   Documents: ${documents.length}`);
+    console.log(`   Chunks: ${allChunks.length}`);
+    console.log(`   Dimensions: ${PatrickEmbeddingGenerator.keywords.length}`);
+    console.log(`   Taille: ${Math.round(fs.statSync(OUTPUT_FILE).size / 1024)} KB`);
     
-    console.log(`\n📑 Sections détectées:`);
+    console.log(`\nSections détectées:`);
     const sections = [...new Set(allChunks.map(c => c.type))];
     sections.forEach(section => {
       const count = allChunks.filter(c => c.type === section).length;
       console.log(`   🏷️  ${section}: ${count} chunks`);
     });
     
-    console.log(`\n📋 Chunks créés:`);
+    console.log(`\nChunks créés:`);
     allChunks.forEach((chunk, i) => {
       console.log(`   ${i + 1}. [${chunk.type}] "${chunk.title.substring(0, 40)}..." (${chunk.wordCount} mots)`);
     });
@@ -426,12 +426,12 @@ async function buildIndex(): Promise<SearchIndex> {
     return index;
 
   } catch (error) {
-    console.error('\n💥 Erreur:', error);
+    console.error('\nErreur:', error);
     process.exit(1);
   }
 }
 
 buildIndex().then(() => {
-  console.log('\n🚀 Index prêt ! Patrick peut maintenant discuter avec son IA.');
+  console.log('\nIndex prêt.');
   process.exit(0);
 });

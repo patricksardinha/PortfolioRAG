@@ -91,7 +91,7 @@ const formatPatrickResponse = (text: string) => {
     .replace(/\bprofessionnel\b/gi, (match) => `<span class="text-blue-400 font-medium">${match}</span>`)
     .replace(/\bnotions\b/gi, (match) => `<span class="text-yellow-400 font-medium">${match}</span>`);
 
-  // 10. MOTS-CLÉS MÉTIER - Gris clair pour mettre en valeur
+  // 10. MOTS-CLÉS MÉTIER - Gris clair
   const keywords = [
     'développement', 'architecture', 'sécurité', 'performance', 
     'optimisation', 'stage', 'formation', 'mission', 'projets',

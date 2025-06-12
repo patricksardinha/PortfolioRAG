@@ -156,7 +156,7 @@ class SearchEngine {
   private applyBoosts(query: string, chunk: ChunkMetadata, baseSimilarity: number): number {
     let boostedSimilarity = baseSimilarity;
     
-    // Boost par type de section - spécifique à Patrick
+    // Boost par type de section 
     const sectionBoosts: Record<string, number> = {
       'experience': 1.3,        // Expériences professionnelles prioritaires
       'projet': 1.25,          // Projets importants  

@@ -404,11 +404,4 @@ export function useGroq() {
 }
 
 export default GroqClient;
-export type { 
-  RateLimitInfo, 
-  GroqModel, 
-  StreamChunk, 
-  ChatOptions, 
-  ChatResponse, 
-  ConnectionTestResult 
-};
+export type { RateLimitInfo, GroqModel, StreamChunk, ChatOptions, ChatResponse, ConnectionTestResult };

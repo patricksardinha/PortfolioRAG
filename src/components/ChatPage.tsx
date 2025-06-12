@@ -50,23 +50,6 @@ export default function ChatPage({ onBack, selectedModel }: ChatPageProps) {
     "Où as-tu travaillé ?",
   ];
 
-  // Fonction pour formater le texte avec markdown 
-  const formatText = (text: string) => {
-    return text
-      // Texte en gras entre *texte* (non greedy)
-      .replace(/\*([^*\n]+?)\*/g, '<strong>$1</strong>')
-      // Texte en italique entre _texte_ (non greedy)
-      .replace(/_([^_\n]+?)_/g, '<em>$1</em>')
-      // Code entre `code` (non greedy)
-      .replace(/`([^`\n]+?)`/g, '<code class="bg-gray-700 px-1 rounded text-sm">$1</code>')
-      // Listes - remplacer les tirets par des puces HTML
-      .replace(/^[\-\*\+]\s+(.+)$/gm, '• $1')
-      // Nettoyer les * restants isolés
-      .replace(/(?:^|\s)\*(?:\s|$)/g, ' ')
-      // Titres ##
-      .replace(/^## (.+)$/gm, '<h3 class="text-lg font-semibold text-white mt-4 mb-2">$1</h3>');
-  }
-
   const handleSendMessage = async (messageText?: string) => {
     const text = messageText || currentMessage.trim();
     if (!text || isLoading) return;
@@ -152,24 +135,6 @@ export default function ChatPage({ onBack, selectedModel }: ChatPageProps) {
       setIsLoading(false);
     }
   };
-
-  const techStack = [
-    {
-      category: "Frontend",
-      icon: Code,
-      items: ["Next.js", "TypeScript", "Tailwind CSS", "React Hooks"]
-    },
-    {
-      category: "Intelligence Artificielle", 
-      icon: Cpu,
-      items: ["Groq API", "RAG System", "Vector Search", "Streaming"]
-    },
-    {
-      category: "Architecture",
-      icon: Database,
-      items: ["BYOK", "Client-side Processing", "Static JSON", "Zero Backend"]
-    }
-  ];
 
   return (
     <div className="h-screen bg-gray-900 text-white flex flex-col overflow-hidden">
