@@ -53,7 +53,7 @@ cd PortfolioRag
 npm install
 
 # Place your CV
-# Copy your CV in PDF format to src/data/documents/cv.pdf
+# Copy your CV in PDF format to src/data/documents/cv.pdf or .txt
 
 # Generate RAG index
 npm run build-index
