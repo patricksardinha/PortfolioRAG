@@ -52,6 +52,7 @@ class GroqClient {
 
   // Validation clé API
   static isValidKey(apiKey: string): boolean {
+    // Tofix
     return apiKey && typeof apiKey === 'string' && apiKey.startsWith('gsk_');
   }
 
